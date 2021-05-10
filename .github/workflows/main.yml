@@ -21,7 +21,7 @@ jobs:
             pthreads-version: bc16ee7b5a21faee9bd1743f830f7135b763fb56
 
     name: PHP ${{ matrix.php }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -42,7 +42,11 @@ jobs:
           export CFLAGS="$CFLAGS -march=x86-64"
           export CXXFLAGS="$CXXFLAGS -march=x86-64"
           PHP_BUILD_INSTALL_EXTENSION='pthreads=@${{ matrix.pthreads-version }}' PHP_BUILD_ZTS_ENABLE=on ./bin/php-build "${{ matrix.php }}" "$GITHUB_WORKSPACE/php"
-          
+
+      - name: Install cached PHP's dependencies
+        if: steps.php-build-cache.outputs.cache-hit == 'true'
+        run: sudo apt update && sudo apt install libzip
+
       - name: Prefix PHP to PATH
         run: echo $GITHUB_WORKSPACE/php/bin >> $GITHUB_PATH
 
