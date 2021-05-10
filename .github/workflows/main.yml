@@ -45,7 +45,7 @@ jobs:
 
       - name: Install cached PHP's dependencies
         if: steps.php-build-cache.outputs.cache-hit == 'true'
-        run: sudo apt update && sudo apt install libzip
+        run: sudo apt update && sudo apt install libzip5
 
       - name: Prefix PHP to PATH
         run: echo $GITHUB_WORKSPACE/php/bin >> $GITHUB_PATH
