@@ -1,5 +1,5 @@
 {
-	"name": "pocketmine/raklib",
+	"name": "venitynetwork/raklib",
 	"description": "A RakNet server implementation written in PHP",
 	"type": "library",
 	"license": "GPL-3.0",
@@ -9,7 +9,7 @@
 		"php-64bit": "*",
 		"ext-sockets": "*",
 		"pocketmine/log": "^0.3.0 || ^0.4.0",
-		"pocketmine/binaryutils": "^0.2.0"
+		"venitynetwork/binaryutils": "dev-master"
 	},
 	"require-dev": {
 		"phpstan/phpstan": "1.7.7",
@@ -19,5 +19,11 @@
 		"psr-4": {
 			"raklib\\": "src/"
 		}
-	}
+	},
+	"repositories": [
+		{
+			"type": "vcs",
+			"url":  "git@github.com:VenityNetwork/BinaryUtils.git"
+		}
+	]
 }
