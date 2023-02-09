@@ -39,8 +39,8 @@ use function microtime;
 use function ord;
 
 class Session{
-	public const MAX_SPLIT_PART_COUNT = 128;
-	public const MAX_CONCURRENT_SPLIT_COUNT = 4;
+	public const MAX_SPLIT_PART_COUNT = 270;
+	public const MAX_CONCURRENT_SPLIT_COUNT = 8;
 
 	public const STATE_CONNECTING = 0;
 	public const STATE_CONNECTED = 1;
