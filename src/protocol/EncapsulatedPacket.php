@@ -29,22 +29,16 @@ class EncapsulatedPacket{
 
 	private const SPLIT_FLAG = 0b00010000;
 
-	/** @var int */
-	public $reliability;
-	/** @var int|null */
-	public $messageIndex;
-	/** @var int|null */
-	public $sequenceIndex;
-	/** @var int|null */
-	public $orderIndex;
-	/** @var int|null */
-	public $orderChannel;
-	/** @var SplitPacketInfo|null */
-	public $splitInfo = null;
-	/** @var string */
-	public $buffer = "";
-	/** @var int|null */
-	public $identifierACK = null;
+	public const SPLIT_INFO_LENGTH = 4 + 2 + 4; //split count (4) + split ID (2) + split index (4)
+
+	public int $reliability;
+	public ?int $messageIndex = null;
+	public ?int $sequenceIndex = null;
+	public ?int $orderIndex = null;
+	public ?int $orderChannel = null;
+	public ?SplitPacketInfo $splitInfo = null;
+	public string $buffer = "";
+	public ?int $identifierACK = null;
 
 	/**
 	 * @throws BinaryDataException
@@ -54,7 +48,7 @@ class EncapsulatedPacket{
 
 		$flags = $stream->getByte();
 		$packet->reliability = $reliability = ($flags & self::RELIABILITY_FLAGS) >> self::RELIABILITY_SHIFT;
-		$hasSplit = ($flags & self::SPLIT_FLAG) > 0;
+		$hasSplit = ($flags & self::SPLIT_FLAG) !== 0;
 
 		$length = (int) ceil($stream->getShort() / 8);
 		if($length === 0){
@@ -96,15 +90,21 @@ class EncapsulatedPacket{
 			. $this->buffer;
 	}
 
-	public function getTotalLength() : int{
+	/**
+	 * @phpstan-return int<3, 23>
+	 */
+	public function getHeaderLength() : int{
 		return
 			1 + //reliability
 			2 + //length
 			(PacketReliability::isReliable($this->reliability) ? 3 : 0) + //message index
 			(PacketReliability::isSequenced($this->reliability) ? 3 : 0) + //sequence index
 			(PacketReliability::isSequencedOrOrdered($this->reliability) ? 3 + 1 : 0) + //order index (3) + order channel (1)
-			($this->splitInfo !== null ? 4 + 2 + 4 : 0) + //split count (4) + split ID (2) + split index (4)
-			strlen($this->buffer);
+			($this->splitInfo !== null ? self::SPLIT_INFO_LENGTH : 0);
+	}
+
+	public function getTotalLength() : int{
+		return $this->getHeaderLength() + strlen($this->buffer);
 	}
 
 	public function __toString() : string{
