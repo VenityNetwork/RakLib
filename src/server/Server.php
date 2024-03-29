@@ -86,6 +86,7 @@ class Server implements ServerInterface{
 		protected ServerSocket $socket,
 		protected int $maxMtuSize,
 		ProtocolAcceptor $protocolAcceptor,
+		AddressAcceptor $addressAcceptor,
 		private ServerEventSource $eventSource,
 		private ServerEventListener $eventListener,
 		private ExceptionTraceCleaner $traceCleaner,
@@ -97,7 +98,7 @@ class Server implements ServerInterface{
 		}
 		$this->socket->setBlocking(false);
 
-		$this->unconnectedMessageHandler = new UnconnectedMessageHandler($this, $protocolAcceptor);
+		$this->unconnectedMessageHandler = new UnconnectedMessageHandler($this, $protocolAcceptor, $addressAcceptor);
 	}
 
 	public function getPort() : int{

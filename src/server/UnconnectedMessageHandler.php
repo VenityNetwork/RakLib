@@ -44,8 +44,9 @@ class UnconnectedMessageHandler{
 	private \SplFixedArray $packetPool;
 
 	public function __construct(
-		private Server $server,
-		private ProtocolAcceptor $protocolAcceptor
+		private Server           $server,
+		private ProtocolAcceptor $protocolAcceptor,
+		private AddressAcceptor  $addressAcceptor,
 	){
 		$this->registerPackets();
 	}
@@ -54,6 +55,9 @@ class UnconnectedMessageHandler{
 	 * @throws BinaryDataException
 	 */
 	public function handleRaw(string $payload, InternetAddress $address) : bool{
+		if(!$this->addressAcceptor->accept($address)) {
+			return false;
+		}
 		if($payload === ""){
 			return false;
 		}
