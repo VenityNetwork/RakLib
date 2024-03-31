@@ -30,7 +30,9 @@ use raklib\protocol\UnconnectedPing;
 use raklib\protocol\UnconnectedPingOpenConnections;
 use raklib\protocol\UnconnectedPong;
 use raklib\utils\InternetAddress;
+use function explode;
 use function get_class;
+use function in_array;
 use function min;
 use function ord;
 use function strlen;
@@ -46,7 +48,6 @@ class UnconnectedMessageHandler{
 	public function __construct(
 		private Server           $server,
 		private ProtocolAcceptor $protocolAcceptor,
-		private AddressAcceptor  $addressAcceptor,
 	){
 		$this->registerPackets();
 	}
@@ -55,8 +56,28 @@ class UnconnectedMessageHandler{
 	 * @throws BinaryDataException
 	 */
 	public function handleRaw(string $payload, InternetAddress $address) : bool{
-		if(!$this->addressAcceptor->accept($address)) {
-			return false;
+		$allowedIPs = $this->server->getAllowedIPs();
+		if($allowedIPs !== null) {
+			if($address->getVersion() === 6){
+				return false;
+			}
+			$block = true;
+			$addressParts = explode(".", $address->getIp());
+			foreach($allowedIPs as $allowedIP){
+				$allowedParts = explode(".", $allowedIP);
+				$allowCnt = 0;
+				for($i = 0; $i < 4; $i++) {
+					if($allowedParts[$i] === "*" || $allowedParts[$i] === $addressParts[$i]) {
+						$allowCnt++;
+					}
+				}
+				if($allowCnt === 4) {
+					$block = false;
+				}
+			}
+			if($block){
+				return false;
+			}
 		}
 		if($payload === ""){
 			return false;

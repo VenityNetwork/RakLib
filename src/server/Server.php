@@ -86,10 +86,10 @@ class Server implements ServerInterface{
 		protected ServerSocket $socket,
 		protected int $maxMtuSize,
 		ProtocolAcceptor $protocolAcceptor,
-		AddressAcceptor $addressAcceptor,
 		private ServerEventSource $eventSource,
 		private ServerEventListener $eventListener,
 		private ExceptionTraceCleaner $traceCleaner,
+		private ?array $allowedIPs,
 		private int $recvMaxSplitParts = ServerSession::DEFAULT_MAX_SPLIT_PART_COUNT,
 		private int $recvMaxConcurrentSplits = ServerSession::DEFAULT_MAX_CONCURRENT_SPLIT_COUNT
 	){
@@ -98,7 +98,7 @@ class Server implements ServerInterface{
 		}
 		$this->socket->setBlocking(false);
 
-		$this->unconnectedMessageHandler = new UnconnectedMessageHandler($this, $protocolAcceptor, $addressAcceptor);
+		$this->unconnectedMessageHandler = new UnconnectedMessageHandler($this, $protocolAcceptor);
 	}
 
 	public function getPort() : int{
@@ -421,5 +421,13 @@ class Server implements ServerInterface{
 
 	public function getID() : int{
 		return $this->serverId;
+	}
+
+	public function getAllowedIPs(): ?array{
+		return $this->allowedIPs;
+	}
+
+	public function setAllowedIPs(?array $allowedIPs): void{
+		$this->allowedIPs = $allowedIPs;
 	}
 }
