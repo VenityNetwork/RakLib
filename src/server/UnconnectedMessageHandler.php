@@ -77,7 +77,7 @@ class UnconnectedMessageHandler{
 			}
 			if(!$this->isAddressAllowed($address->getIp(), $allowedIPs)) {
 				$this->server->getLogger()->debug("IP Address {$address->getIp()} is not allowed");
-				$this->server->blockAddress($address->getIp());
+				$this->server->blockAddress($address->getIp(), 5);
 				return false;
 			}
 		}
