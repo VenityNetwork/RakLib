@@ -52,6 +52,20 @@ class UnconnectedMessageHandler{
 		$this->registerPackets();
 	}
 
+	private function isAddressAllowed(string $ip, array $allowedIPs): bool{
+		$ipParts = explode(".", $ip);
+		foreach($allowedIPs as $allowedIP){
+			$allowedIPParts = explode(".", $allowedIP);
+			for($i = 0; $i < 4; $i++) {
+				if(!($allowedIPParts[$i] === "*" || $allowedIPParts[$i] === $ipParts[$i])) {
+					continue 2;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * @throws BinaryDataException
 	 */
@@ -61,21 +75,9 @@ class UnconnectedMessageHandler{
 			if($address->getVersion() === 6){
 				return false;
 			}
-			$block = true;
-			$addressParts = explode(".", $address->getIp());
-			foreach($allowedIPs as $allowedIP){
-				$allowedParts = explode(".", $allowedIP);
-				$allowCnt = 0;
-				for($i = 0; $i < 4; $i++) {
-					if($allowedParts[$i] === "*" || $allowedParts[$i] === $addressParts[$i]) {
-						$allowCnt++;
-					}
-				}
-				if($allowCnt === 4) {
-					$block = false;
-				}
-			}
-			if($block){
+			if(!$this->isAddressAllowed($address->getIp(), $allowedIPs)) {
+				$this->server->getLogger()->debug("IP Address {$address->getIp()} is not allowed");
+				$this->server->blockAddress($address->getIp());
 				return false;
 			}
 		}
